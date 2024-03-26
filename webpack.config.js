@@ -3,6 +3,11 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 export default {
   mode: process.env.NODE_ENV || 'development',
   module: {
+    entry: './src/index.js',
+    devServer: {
+      open: true,
+      host: 'localhost',
+    },
     rules: [
       {
         test: /\.js$/,
@@ -34,7 +39,4 @@ export default {
       template: 'index.html',
     }),
   ],
-  output: {
-    clean: true,
-  },
 };
