@@ -2,12 +2,12 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default {
   mode: process.env.NODE_ENV || 'development',
+  entry: './src/index.js',
+  devServer: {
+    open: true,
+    host: 'localhost',
+  },
   module: {
-    entry: './src/index.js',
-    devServer: {
-      open: true,
-      host: 'localhost',
-    },
     rules: [
       {
         test: /\.js$/,
