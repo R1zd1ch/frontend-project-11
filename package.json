@@ -1,0 +1,54 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "RSS-Reader",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/R1zd1ch/frontend-project-11.git"
+  },
+  "author": "Kirill Mokevnin",
+  "license": "ISC",
+  "homepage": "https://github.com/R1zd1ch/frontend-project-11/frontend-project-11#readme",
+  "main": "src/index.js",
+  "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/preset-env": "^7.20.2",
+    "babel-jest": "^29.3.1",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^6.10.0",
+    "debug": "^4.3.4",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.2.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.6.0",
+    "jest": "^29.3.1",
+    "jest-cli": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
+    "postcss-loader": "^7.3.4",
+    "postcss-preset-env": "^7.8.3",
+    "sass": "^1.72.0",
+    "sass-loader": "^14.1.1",
+    "style-loader": "^3.3.4",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3",
+    "npm-check-updates": "^16.6.2"
+  },
+  "bugs": {
+    "url": "https://github.com/R1zd1ch/frontend-project-11/issues"
+  }
+}
