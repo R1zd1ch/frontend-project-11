@@ -46,7 +46,10 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
-    "npm-check-updates": "^16.6.2"
+    "npm-check-updates": "^16.6.2",
+    "on-change": "^5.0.1",
+    "onchange": "^7.1.0",
+    "yup": "^1.4.0"
   },
   "bugs": {
     "url": "https://github.com/R1zd1ch/frontend-project-11/issues"

@@ -7,6 +7,10 @@ export default {
     open: true,
     host: 'localhost',
   },
+  watchOptions: {
+    ignored: '/node_modules/',
+    poll: 1000, // Necessary for auto-reload w/ WSL
+  },
   module: {
     rules: [
       // {
