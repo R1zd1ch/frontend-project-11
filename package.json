@@ -46,6 +46,7 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
+    "i18next": "^23.10.1",
     "npm-check-updates": "^16.6.2",
     "on-change": "^5.0.1",
     "onchange": "^7.1.0",
