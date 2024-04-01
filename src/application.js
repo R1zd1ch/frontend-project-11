@@ -1,8 +1,11 @@
 import onChange from 'on-change';
 import * as yup from 'yup';
 import i18next from 'i18next';
+import axios from 'axios';
+import { uniqueId } from 'lodash';
 import render from './view.js';
 import ru from './locales/ru.js';
+import parse from './parser.js';
 
 const validate = (url, links) => {
   const schema = yup
@@ -12,6 +15,13 @@ const validate = (url, links) => {
     .url()
     .notOneOf(links);
   return schema.validate(url);
+};
+
+const getResponseWithAllOrigins = (url) => {
+  const allOriginsGetURL = new URL('https://allorigins.hexlet.app/get');
+  allOriginsGetURL.searchParams.set('disableCache', 'true');
+  allOriginsGetURL.searchParams.set('url', url);
+  return axios.get(allOriginsGetURL);
 };
 
 const app = () => {
@@ -33,6 +43,7 @@ const app = () => {
         },
         content: {
           feeds: [],
+          posts: [],
         },
       };
 
@@ -74,12 +85,16 @@ const app = () => {
           .then((link) => {
             watchedState.form.state = 'sending';
             console.log('sending test'); // eslint-disable-line
-            return link;
+            return getResponseWithAllOrigins(link);
           })
-          .then((feed) => {
+          .then((response) => {
+            const rssXML = response.data.contents;
+            const { feed, posts } = parse(rssXML);
+            const newPostsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
+            watchedState.content.feeds.push({ ...feed, id: uniqueId(), link: url });
+            watchedState.content.posts = [...newPostsWithId, ...watchedState.content.posts];
             watchedState.form.state = 'finished';
-            watchedState.content.feeds.push({ feed, link: url });
-            console.log(initialState.content.feeds); // eslint-disable-line
+            console.log(initialState.content); // eslint-disable-line
           })
           .catch((error) => {
             const errorKey = error.message;
