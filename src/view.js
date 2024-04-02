@@ -96,6 +96,10 @@ const renderPosts = (elements, state, i18nT) => {
   card.append(cardBody, cardList);
 
   posts.append(card);
+  // if (posts.length >= 10) {
+  //   const lastCard = posts.lastChild;
+  //   posts.removeChild(lastCard);
+  // }
 };
 
 const handleFillingFormState = (elements) => {
@@ -158,7 +162,9 @@ const render = (elements, initialState, i18nT) => (path, value) => {
     case 'form.state':
       handleFormState(elements, initialState, value, i18nT);
       break;
-
+    case 'content.posts':
+      renderPosts(elements, initialState, i18nT);
+      break;
     default:
       break;
   }

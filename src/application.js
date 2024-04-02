@@ -7,6 +7,8 @@ import render from './view.js';
 import ru from './locales/ru.js';
 import parse from './parser.js';
 
+const refreshTimeInterval = 500;
+
 const validate = (url, links) => {
   const schema = yup
     .string()
@@ -22,6 +24,35 @@ const getResponseWithAllOrigins = (url) => {
   allOriginsGetURL.searchParams.set('disableCache', 'true');
   allOriginsGetURL.searchParams.set('url', url);
   return axios.get(allOriginsGetURL);
+};
+
+const addNewPosts = (state, posts) => {
+  const newPostsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
+  // eslint-disable-next-line no-param-reassign
+  state.content.posts = [...newPostsWithId, ...state.content.posts];
+};
+
+const feedsRefresher = (state) => {
+  const { feeds } = state.content;
+  const oldPosts = state.content.posts;
+  const oldLinks = oldPosts.map((post) => post.link);
+
+  console.log('check new posts');
+
+  const promises = feeds.map((feed) => getResponseWithAllOrigins(feed.link)
+    .then((response) => {
+      const rssXML = response.data.contents;
+      const { posts } = parse(rssXML);
+
+      const newPosts = posts.filter((post) => !oldLinks.includes(post.link));
+      if (newPosts.length > 0) {
+        addNewPosts(state, newPosts);
+      }
+      return Promise.resolve();
+    }));
+  Promise.all(promises).finally(() => {
+    setTimeout(() => feedsRefresher(state), refreshTimeInterval);
+  });
 };
 
 const app = () => {
@@ -69,6 +100,8 @@ const app = () => {
 
       const watchedState = onChange(initialState, render(elements, initialState, i18nT));
 
+      feedsRefresher(watchedState);
+
       elements.form.addEventListener('input', () => {
         watchedState.form.state = 'filling';
         watchedState.form.error = null;
@@ -93,6 +126,7 @@ const app = () => {
             const newPostsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
             watchedState.content.feeds.push({ ...feed, id: uniqueId(), link: url });
             watchedState.content.posts = [...newPostsWithId, ...watchedState.content.posts];
+            addNewPosts(watchedState, posts);
             watchedState.form.state = 'finished';
             console.log(initialState.content); // eslint-disable-line
           })
