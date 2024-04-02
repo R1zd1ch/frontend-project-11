@@ -7,7 +7,7 @@ import render from './view.js';
 import ru from './locales/ru.js';
 import parse from './parser.js';
 
-const refreshTimeInterval = 500;
+const refreshTimeInterval = 5000;
 
 const validate = (url, links) => {
   const schema = yup
@@ -37,7 +37,7 @@ const feedsRefresher = (state) => {
   const oldPosts = state.content.posts;
   const oldLinks = oldPosts.map((post) => post.link);
 
-  console.log('check new posts');
+  console.log('check new posts');  // eslint-disable-line
 
   const promises = feeds.map((feed) => getResponseWithAllOrigins(feed.link)
     .then((response) => {
@@ -76,6 +76,10 @@ const app = () => {
           feeds: [],
           posts: [],
         },
+        uiState: {
+          modalId: null,
+          visitedIds: [],
+        },
       };
 
       const elements = {
@@ -86,7 +90,7 @@ const app = () => {
         posts: document.querySelector('.posts'),
         feeds: document.querySelector('.feeds'),
         modal: {
-          modalElement: document.querySelector('.modal'),
+          container: document.querySelector('.modal'),
           title: document.querySelector('.modal-title'),
           body: document.querySelector('.modal-body'),
           btn: document.querySelector('.full-article'),
@@ -128,13 +132,28 @@ const app = () => {
             watchedState.content.posts = [...newPostsWithId, ...watchedState.content.posts];
             addNewPosts(watchedState, posts);
             watchedState.form.state = 'finished';
-            console.log(initialState.content); // eslint-disable-line
+            console.log(initialState); // eslint-disable-line
           })
           .catch((error) => {
             const errorKey = error.message;
             watchedState.form.error = errorKey;
             watchedState.form.state = 'failed';
           });
+      });
+
+      elements.posts.addEventListener('click', (e) => {
+        const { id } = e.target.dataset;
+        if (id && !initialState.uiState.visitedIds.includes(id)) {
+          watchedState.uiState.visitedIds.push(id);
+        }
+      });
+
+      elements.modal.container.addEventListener('shown.bs.modal', (e) => {
+        const { id } = e.relatedTarget.dataset;
+        if (!initialState.uiState.visitedIds.includes(id)) {
+          watchedState.uiState.visitedIds.push(id);
+        }
+        watchedState.uiState.modalId = id;
       });
     });
 };
