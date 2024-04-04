@@ -128,6 +128,7 @@ const handleFinishedFormState = (elements, state, i18nT) => {
   elements.feedback.classList.add('text-success');
   elements.input.classList.remove('is-invalid');
   elements.feedback.textContent = i18nT('success');
+
   renderFeeds(elements, state, i18nT);
   renderPosts(elements, state, i18nT);
 };
