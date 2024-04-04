@@ -1,32 +1,22 @@
-const domParser = new DOMParser();
-
 const parse = (xml) => {
+  const domParser = new DOMParser();
   const parsedDOM = domParser.parseFromString(xml, 'application/xml');
-  const parsingError = parsedDOM.querySelector('parseerror');
+
+  const parsingError = parsedDOM.querySelector('parsererror');
   if (parsingError) throw new Error('parsingError');
 
   const channel = parsedDOM.querySelector('channel');
-  if (!channel) throw new Error('No channel found in XML');
-
-  const titleElement = channel.querySelector('title');
-  const title = titleElement ? titleElement.textContent : '';
-
-  const descriptionElement = channel.querySelector('description');
-  const description = descriptionElement ? descriptionElement.textContent : '';
-
+  const title = channel.querySelector('title').textContent;
+  const description = channel.querySelector('description').textContent;
   const feed = { title, description };
 
   const items = parsedDOM.querySelectorAll('item');
-  const posts = Array.from(items).map((item) => {
-    const postLinkElement = item.querySelector('link');
-    const postLink = postLinkElement ? postLinkElement.textContent : '';
+  const itemsArray = Array.from(items);
 
-    const postTitleElement = item.querySelector('title');
-    const postTitle = postTitleElement ? postTitleElement.textContent : '';
-
-    const postDescriptionElement = item.querySelector('description');
-    const postDescription = postDescriptionElement ? postDescriptionElement.textContent : '';
-
+  const posts = itemsArray.map((item) => {
+    const postLink = item.querySelector('link').textContent;
+    const postTitle = item.querySelector('title').textContent;
+    const postDescription = item.querySelector('description').textContent;
     return {
       link: postLink,
       title: postTitle,

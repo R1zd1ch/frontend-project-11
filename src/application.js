@@ -6,12 +6,11 @@ import * as yup from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
-
-import parse from './parser.js';
 import render from './view.js';
 import ru from './locales/ru.js';
+import parse from './parser.js';
 
-const refreshInterval = 5000;
+const refreshTimeInterval = 5000;
 
 const validate = (url, links) => {
   const schema = yup
@@ -35,7 +34,7 @@ const addNewPosts = (state, posts) => {
   state.content.posts = [...newPostsWithId, ...state.content.posts];
 };
 
-const runFeedsRefresher = (state) => {
+const feedsRefresher = (state) => {
   const { feeds } = state.content;
   const oldPosts = state.content.posts;
 
@@ -52,13 +51,12 @@ const runFeedsRefresher = (state) => {
       }
     });
   });
-
   Promise.all(promises).finally(() => {
-    setTimeout(() => runFeedsRefresher(state), refreshInterval);
+    setTimeout(() => feedsRefresher(state), refreshTimeInterval);
   });
 };
 
-const runApp = () => {
+const app = () => {
   const i18nInstance = i18next.createInstance();
   i18nInstance
     .init({
@@ -69,6 +67,7 @@ const runApp = () => {
       },
     })
     .then((i18nT) => {
+      // filling, sending, finished, failed
       const initialState = {
         form: {
           state: 'filling',
@@ -106,7 +105,7 @@ const runApp = () => {
 
       const watchedState = onChange(initialState, render(elements, initialState, i18nT));
 
-      runFeedsRefresher(watchedState);
+      feedsRefresher(watchedState);
 
       elements.form.addEventListener('input', () => {
         watchedState.form.state = 'filling';
@@ -122,14 +121,15 @@ const runApp = () => {
 
         validate(url, links)
           .then((link) => {
-            watchedState.form.state = 'sending';
             const allOriginsURL = getAllOriginsURL(link);
             return axios.get(allOriginsURL);
           })
           .then((response) => {
             const rssXML = response.data.contents;
             const { feed, posts } = parse(rssXML);
+            const newPostsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
             watchedState.content.feeds.push({ ...feed, id: uniqueId(), link: url });
+            watchedState.content.posts = [...newPostsWithId, ...watchedState.content.posts];
             addNewPosts(watchedState, posts);
             watchedState.form.state = 'finished';
           })
@@ -147,7 +147,7 @@ const runApp = () => {
         }
       });
 
-      elements.modal.container.addEventListener('show.bs.modal', (e) => {
+      elements.modal.container.addEventListener('shown.bs.modal', (e) => {
         const { id } = e.relatedTarget.dataset;
         if (!initialState.uiState.visitedIds.includes(id)) {
           watchedState.uiState.visitedIds.push(id);
@@ -157,4 +157,4 @@ const runApp = () => {
     });
 };
 
-export default runApp;
+export default app;
