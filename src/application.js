@@ -147,7 +147,7 @@ const app = () => {
         }
       });
 
-      elements.modal.container.addEventListener('shown.bs.modal', (e) => {
+      elements.modal.container.addEventListener('show.bs.modal', (e) => {
         const { id } = e.relatedTarget.dataset;
         if (!initialState.uiState.visitedIds.includes(id)) {
           watchedState.uiState.visitedIds.push(id);
