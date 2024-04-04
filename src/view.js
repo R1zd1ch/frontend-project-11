@@ -96,10 +96,6 @@ const renderPosts = (elements, state, i18nT) => {
   card.append(cardBody, cardList);
 
   posts.append(card);
-  // if (posts.length >= 10) {
-  //   const lastCard = posts.lastChild;
-  //   posts.removeChild(lastCard);
-  // }
 };
 
 const renderModal = (elements, state, modalId) => {
@@ -131,7 +127,7 @@ const handleFinishedFormState = (elements, state, i18nT) => {
   elements.feedback.classList.remove('text-danger');
   elements.feedback.classList.add('text-success');
   elements.input.classList.remove('is-invalid');
-  elements.feedback.textContent = i18nT('success'); // TEMP
+  elements.feedback.textContent = i18nT('success');
   renderFeeds(elements, state, i18nT);
   renderPosts(elements, state, i18nT);
 };
@@ -143,7 +139,7 @@ const handleFailedFormState = (elements, errorKey, i18nT) => {
 
   elements.feedback.classList.add('text-danger');
   elements.input.classList.add('is-invalid');
-  elements.feedback.textContent = i18nT(`errors.${errorKey}`); // TEMP
+  elements.feedback.textContent = i18nT(`errors.${errorKey.replace(' ', '')}`);
 };
 
 const handleFormState = (elements, initialState, formState, i18nT) => {

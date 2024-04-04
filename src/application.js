@@ -19,11 +19,11 @@ const validate = (url, links) => {
   return schema.validate(url);
 };
 
-const getResponseWithAllOrigins = (url) => {
+const getAllOriginsURL = (url) => {
   const allOriginsGetURL = new URL('https://allorigins.hexlet.app/get');
   allOriginsGetURL.searchParams.set('disableCache', 'true');
   allOriginsGetURL.searchParams.set('url', url);
-  return axios.get(allOriginsGetURL);
+  return allOriginsGetURL;
 };
 
 const addNewPosts = (state, posts) => {
@@ -35,21 +35,20 @@ const addNewPosts = (state, posts) => {
 const feedsRefresher = (state) => {
   const { feeds } = state.content;
   const oldPosts = state.content.posts;
-  const oldLinks = oldPosts.map((post) => post.link);
 
-  console.log('check new posts');  // eslint-disable-line
-
-  const promises = feeds.map((feed) => getResponseWithAllOrigins(feed.link)
-    .then((response) => {
+  const promises = feeds.map((feed) => {
+    const { link } = feed;
+    const allOriginsURL = getAllOriginsURL(link);
+    return axios.get(allOriginsURL).then((response) => {
       const rssXML = response.data.contents;
       const { posts } = parse(rssXML);
-
+      const oldLinks = oldPosts.map((post) => post.link);
       const newPosts = posts.filter((post) => !oldLinks.includes(post.link));
       if (newPosts.length > 0) {
         addNewPosts(state, newPosts);
       }
-      return Promise.resolve();
-    }));
+    });
+  });
   Promise.all(promises).finally(() => {
     setTimeout(() => feedsRefresher(state), refreshTimeInterval);
   });
@@ -120,9 +119,8 @@ const app = () => {
 
         validate(url, links)
           .then((link) => {
-            watchedState.form.state = 'sending';
-            console.log('sending test'); // eslint-disable-line
-            return getResponseWithAllOrigins(link);
+            const allOriginsURL = getAllOriginsURL(link);
+            return axios.get(allOriginsURL);
           })
           .then((response) => {
             const rssXML = response.data.contents;
@@ -132,7 +130,6 @@ const app = () => {
             watchedState.content.posts = [...newPostsWithId, ...watchedState.content.posts];
             addNewPosts(watchedState, posts);
             watchedState.form.state = 'finished';
-            console.log(initialState); // eslint-disable-line
           })
           .catch((error) => {
             const errorKey = error.message;
