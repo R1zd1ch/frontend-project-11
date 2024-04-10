@@ -1,1 +1,6 @@
 @import "bootstrap";
+// потому что у почему-то при Muted он того же цвета, что и бекграунд
+.text-muted {
+	--bs-text-opacity: 1;
+	color: #6c757d !important;
+}

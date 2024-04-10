@@ -38,21 +38,24 @@ const addNewPosts = (state, posts) => {
 const runFeedsRefresher = (state) => {
   const { feeds } = state.content;
   const oldPosts = state.content.posts;
-
   const promises = feeds.map((feed) => {
-    const { link } = feed;
+    const { id, link } = feed;
     const allOriginsURL = getAllOriginsURL(link);
-    return axios.get(allOriginsURL).then((response) => {
-      const rssXML = response.data.contents;
-      const { posts } = parse(rssXML);
-      const oldLinks = oldPosts.map((post) => post.link);
-      const newPosts = posts.filter((post) => !oldLinks.includes(post.link));
-      if (newPosts.length > 0) {
-        addNewPosts(state, newPosts);
-      }
-    });
+    return axios.get(allOriginsURL)
+      .then((response) => {
+        const rssXML = response.data.contents;
+        const { posts } = parse(rssXML);
+        const oldLinks = oldPosts.map((post) => post.link);
+        const newPosts = posts.filter((post) => !oldLinks.includes(post.link));
+        if (newPosts.length > 0) {
+          addNewPosts(state, newPosts);
+        }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(`Error loading feed from ${id}:`, error);
+      });
   });
-
   Promise.all(promises).finally(() => {
     setTimeout(() => runFeedsRefresher(state), refreshInterval);
   });
@@ -74,6 +77,7 @@ const runApp = () => {
           state: 'filling',
           error: null,
         },
+        loading: false,
         content: {
           feeds: [],
           posts: [],
@@ -108,21 +112,19 @@ const runApp = () => {
 
       runFeedsRefresher(watchedState);
 
-      elements.form.addEventListener('input', () => {
-        watchedState.form.state = 'filling';
-        watchedState.form.error = null;
-      });
-
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const formData = new FormData(elements.form);
         const url = formData.get('url');
         const links = watchedState.content.feeds.map(({ link }) => link);
 
+        if (watchedState.loading) {
+          return;
+        }
+
+        watchedState.loading = true;
         validate(url, links)
           .then((link) => {
-            watchedState.form.state = 'sending';
             const allOriginsURL = getAllOriginsURL(link);
             return axios.get(allOriginsURL);
           })
@@ -137,6 +139,9 @@ const runApp = () => {
             const errorKey = error.message;
             watchedState.form.error = errorKey;
             watchedState.form.state = 'failed';
+          })
+          .finally(() => {
+            watchedState.loading = false;
           });
       });
 
@@ -147,14 +152,6 @@ const runApp = () => {
         }
         watchedState.uiState.modalId = id;
       });
-
-      // elements.modal.container.addEventListener('show.bs.modal', (e) => {
-      //   const { id } = e.relatedTarget.dataset;
-      //   if (!initialState.uiState.visitedIds.includes(id)) {
-      //     watchedState.uiState.visitedIds.push(id);
-      //   }
-      //   watchedState.uiState.modalId = id;
-      // });
     });
 };
 

@@ -111,6 +111,7 @@ const handleFillingFormState = (elements) => {
   elements.feedback.classList.remove('text-success');
   elements.input.classList.remove('is-invalid');
   elements.feedback.textContent = '';
+  document.querySelector('.mt-2').classList.add('text-secondary');
 };
 
 const handleSendingFormState = (elements) => {
@@ -118,7 +119,7 @@ const handleSendingFormState = (elements) => {
   elements.input.disabled = true;
 };
 
-const handleFinishedFormState = (elements, state, i18nT) => {
+const handleFinishedFormState = (elements, i18nT) => {
   elements.btn.disabled = false;
   elements.input.disabled = false;
   elements.input.focus();
@@ -128,9 +129,6 @@ const handleFinishedFormState = (elements, state, i18nT) => {
   elements.feedback.classList.add('text-success');
   elements.input.classList.remove('is-invalid');
   elements.feedback.textContent = i18nT('success');
-
-  renderFeeds(elements, state, i18nT);
-  renderPosts(elements, state, i18nT);
 };
 
 const handleFailedFormState = (elements, errorKey, i18nT) => {
@@ -152,7 +150,7 @@ const handleFormState = (elements, initialState, formState, i18nT) => {
       handleSendingFormState(elements);
       break;
     case 'finished':
-      handleFinishedFormState(elements, initialState, i18nT);
+      handleFinishedFormState(elements, i18nT);
       break;
     case 'failed':
       handleFailedFormState(elements, initialState.form.error, i18nT);
@@ -164,12 +162,15 @@ const handleFormState = (elements, initialState, formState, i18nT) => {
 
 const render = (elements, initialState, i18nT) => (path, value) => {
   switch (path) {
-    case 'form.state':
-      handleFormState(elements, initialState, value, i18nT);
+    case 'content.feeds':
+      renderFeeds(elements, initialState, i18nT);
       break;
     case 'content.posts':
     case 'uiState.visitedIds':
       renderPosts(elements, initialState, i18nT);
+      break;
+    case 'form.state':
+      handleFormState(elements, initialState, value, i18nT);
       break;
     case 'uiState.modalId':
       renderModal(elements, initialState, value);
