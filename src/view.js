@@ -74,7 +74,7 @@ const renderPosts = (elements, state, i18nT) => {
 
     const listItemLink = document.createElement('a');
     listItemLink.href = post.link;
-    listItemLink.classList.add(state.uiState.visitedIds.includes(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold');
+    listItemLink.classList.add(state.uiState.visitedIds.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold');
     listItemLink.setAttribute('data-id', post.id);
     listItemLink.target = '_blank';
     listItemLink.rel = 'noopener noreferrer';

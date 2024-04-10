@@ -9,7 +9,7 @@ import { uniqueId } from 'lodash';
 
 import parse from './parser.js';
 import render from './view.js';
-import ru from './locales/ru.js';
+import localesResources from './locales/index.js';
 
 const refreshInterval = 5000;
 
@@ -65,7 +65,7 @@ const runApp = () => {
       lng: 'ru',
       debug: false,
       resources: {
-        ru,
+        ...localesResources,
       },
     })
     .then((i18nT) => {
@@ -80,7 +80,7 @@ const runApp = () => {
         },
         uiState: {
           modalId: null,
-          visitedIds: [],
+          visitedIds: new Set(),
         },
       };
 
@@ -142,18 +142,19 @@ const runApp = () => {
 
       elements.posts.addEventListener('click', (e) => {
         const { id } = e.target.dataset;
-        if (id && !initialState.uiState.visitedIds.includes(id)) {
-          watchedState.uiState.visitedIds.push(id);
-        }
-      });
-
-      elements.modal.container.addEventListener('show.bs.modal', (e) => {
-        const { id } = e.relatedTarget.dataset;
-        if (!initialState.uiState.visitedIds.includes(id)) {
-          watchedState.uiState.visitedIds.push(id);
+        if (id && !initialState.uiState.visitedIds.has(id)) {
+          watchedState.uiState.visitedIds.add(id);
         }
         watchedState.uiState.modalId = id;
       });
+
+      // elements.modal.container.addEventListener('show.bs.modal', (e) => {
+      //   const { id } = e.relatedTarget.dataset;
+      //   if (!initialState.uiState.visitedIds.includes(id)) {
+      //     watchedState.uiState.visitedIds.push(id);
+      //   }
+      //   watchedState.uiState.modalId = id;
+      // });
     });
 };
 
