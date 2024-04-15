@@ -1,6 +1,3 @@
-/* eslint no-param-reassign: ["error", { "props": true,
-"ignorePropertyModificationsFor": ["state"] }] */
-
 import onChange from 'on-change';
 import * as yup from 'yup';
 import i18next from 'i18next';
@@ -9,7 +6,7 @@ import { uniqueId } from 'lodash';
 
 import parse from './parser.js';
 import render from './view.js';
-import localesResources from './locales/index.js';
+import resources from './locales/index.js';
 
 const refreshInterval = 5000;
 
@@ -32,7 +29,7 @@ const getAllOriginsURL = (url) => {
 
 const addNewPosts = (state, posts) => {
   const newPostsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
-  state.content.posts = [...newPostsWithId, ...state.content.posts];
+  state.content.posts.unshift(...newPostsWithId);
 };
 
 const runFeedsRefresher = (state) => {
@@ -67,9 +64,7 @@ const runApp = () => {
     .init({
       lng: 'ru',
       debug: false,
-      resources: {
-        ...localesResources,
-      },
+      resources,
     })
     .then((i18nT) => {
       const initialState = {
@@ -110,11 +105,9 @@ const runApp = () => {
 
       const watchedState = onChange(initialState, render(elements, initialState, i18nT));
 
-      runFeedsRefresher(watchedState);
-
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const formData = new FormData(elements.form);
+        const formData = new FormData(e.target);
         const url = formData.get('url');
         const links = watchedState.content.feeds.map(({ link }) => link);
 
@@ -152,6 +145,7 @@ const runApp = () => {
         }
         watchedState.uiState.modalId = id;
       });
+      runFeedsRefresher(watchedState);
     });
 };
 

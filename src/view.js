@@ -1,6 +1,3 @@
-/* eslint no-param-reassign: ["error", { "props": true,
-"ignorePropertyModificationsFor": ["state", "elements"] }] */
-
 const renderFeeds = (elements, state, i18nT) => {
   const { feeds } = elements;
   feeds.innerHTML = '';
@@ -101,44 +98,49 @@ const renderPosts = (elements, state, i18nT) => {
 const renderModal = (elements, state, modalId) => {
   const post = state.content.posts.find(({ id }) => id === modalId);
   const { title, description, link } = post;
-  elements.modal.title.textContent = title;
-  elements.modal.body.textContent = description;
-  elements.modal.btn.href = link;
+  const { modal } = elements;
+  modal.title.textContent = title;
+  modal.body.textContent = description;
+  modal.btn.href = link;
 };
 
 const handleFillingFormState = (elements) => {
+  const { feedback } = elements;
   elements.feedback.classList.remove('text-danger');
   elements.feedback.classList.remove('text-success');
   elements.input.classList.remove('is-invalid');
-  elements.feedback.textContent = '';
+  feedback.textContent = '';
   document.querySelector('.mt-2').classList.add('text-secondary');
 };
 
 const handleSendingFormState = (elements) => {
-  elements.btn.disabled = true;
-  elements.input.disabled = true;
+  const { btn, input } = elements;
+  btn.disabled = true;
+  input.disabled = true;
 };
 
 const handleFinishedFormState = (elements, i18nT) => {
-  elements.btn.disabled = false;
-  elements.input.disabled = false;
+  const { btn, input, feedback } = elements;
+  btn.disabled = false;
+  input.disabled = false;
   elements.input.focus();
-  elements.input.value = '';
+  input.value = '';
 
   elements.feedback.classList.remove('text-danger');
   elements.feedback.classList.add('text-success');
   elements.input.classList.remove('is-invalid');
-  elements.feedback.textContent = i18nT('success');
+  feedback.textContent = i18nT('success');
 };
 
 const handleFailedFormState = (elements, errorKey, i18nT) => {
-  elements.btn.disabled = false;
-  elements.input.disabled = false;
+  const { btn, input, feedback } = elements;
+  btn.disabled = false;
+  input.disabled = false;
   elements.input.focus();
 
   elements.feedback.classList.add('text-danger');
   elements.input.classList.add('is-invalid');
-  elements.feedback.textContent = i18nT(`errors.${errorKey.replace(' ', '')}`);
+  feedback.textContent = i18nT(`errors.${errorKey.replace(' ', '')}`);
 };
 
 const handleFormState = (elements, initialState, formState, i18nT) => {
