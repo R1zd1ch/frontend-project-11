@@ -144,6 +144,10 @@ const handleFailedFormState = (elements, errorKey, i18nT) => {
 };
 
 const handleFormState = (elements, initialState, formState, i18nT) => {
+  const loadingError = initialState.loadingState.error;
+  const formError = initialState.form.error;
+  const errorName = formError !== null ? formError : loadingError;
+
   switch (formState) {
     case 'filling':
       handleFillingFormState(elements);
@@ -155,7 +159,7 @@ const handleFormState = (elements, initialState, formState, i18nT) => {
       handleFinishedFormState(elements, i18nT);
       break;
     case 'failed':
-      handleFailedFormState(elements, initialState.form.error, i18nT);
+      handleFailedFormState(elements, errorName, i18nT);
       break;
     default:
       break;
@@ -172,6 +176,7 @@ const render = (elements, initialState, i18nT) => (path, value) => {
       renderPosts(elements, initialState, i18nT);
       break;
     case 'form.state':
+    case 'loadingState.state':
       handleFormState(elements, initialState, value, i18nT);
       break;
     case 'uiState.modalId':

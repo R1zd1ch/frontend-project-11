@@ -3,7 +3,9 @@ const parse = (xml) => {
   const parsedDOM = domParser.parseFromString(xml, 'application/xml');
 
   const parsingError = parsedDOM.querySelector('parsererror');
-  if (parsingError) throw new Error('parsingError');
+  if (parsingError) {
+    throw new Error('parsingError');
+  }
 
   const channel = parsedDOM.querySelector('channel');
   const title = channel.querySelector('title').textContent;

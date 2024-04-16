@@ -10,13 +10,14 @@ import resources from './locales/index.js';
 
 const refreshInterval = 5000;
 
-const validate = (url, links) => {
+const validate = (url, feeds) => {
+  const feedUrls = feeds.map((feed) => feed.url);
   const schema = yup
     .string()
     .trim()
-    .required()
-    .url()
-    .notOneOf(links);
+    .required(i18next.t('errors.emptyForm'))
+    .url(i18next.t('errors.invalidLink'))
+    .notOneOf(feedUrls, i18next.t('errors.existingFeed'));
   try {
     schema.validateSync(url);
     return null;
@@ -78,7 +79,7 @@ const runApp = () => {
           error: null,
         },
         loadingState: {
-          status: 'idle',
+          state: 'idle',
           error: null,
         },
         content: {
@@ -114,36 +115,36 @@ const runApp = () => {
       const watchedState = onChange(initialState, render(elements, initialState, i18nT));
 
       const loadRss = (url) => {
-        watchedState.loadingState.status = 'loading';
+        watchedState.loadingState.state = 'loading';
+        watchedState.loadingState.error = null;
 
-        return axios.get(getAllOriginsURL(url), { timeout: refreshInterval })
+        return axios.get(getAllOriginsURL(url))
           .then((response) => {
             const rssXML = response.data.contents;
             const { feed, posts } = parse(rssXML);
             watchedState.content.feeds.push({ ...feed, id: uniqueId(), link: url });
             addNewPosts(watchedState, posts);
-            watchedState.loadingState.status = 'idle';
+            watchedState.loadingState.state = 'idle';
             watchedState.form.state = 'finished';
           })
-          .catch((e) => {
-            const errorKey = e.message;
+          .catch((error) => {
+            const errorKey = error.message;
             watchedState.loadingState.error = errorKey;
-            watchedState.loadingState.status = 'failed';
-            throw e;
+            watchedState.loadingState.state = 'failed';
           });
       };
 
-      elements.form.addEventListener('submit', (evt) => {
-        evt.preventDefault();
-        const formData = new FormData(evt.target);
+      elements.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
         const url = formData.get('url');
-        const links = watchedState.content.feeds.map(({ link }) => link);
-        const error = validate(url, links);
+        const error = validate(url, watchedState.content.feeds);
         if (error) {
           watchedState.form.error = error;
           watchedState.form.state = 'failed';
           return;
         }
+
         watchedState.form.state = 'sending';
 
         loadRss(url);
