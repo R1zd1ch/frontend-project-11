@@ -175,8 +175,8 @@ const render = (elements, initialState, i18nT) => (path, value) => {
     case 'uiState.visitedIds':
       renderPosts(elements, initialState, i18nT);
       break;
-    case 'form.state':
     case 'loadingState.state':
+    case 'form.state':
       handleFormState(elements, initialState, value, i18nT);
       break;
     case 'uiState.modalId':

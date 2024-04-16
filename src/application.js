@@ -10,14 +10,12 @@ import resources from './locales/index.js';
 
 const refreshInterval = 5000;
 
-const validate = (url, feeds) => {
-  const feedUrls = feeds.map((feed) => feed.url);
+const validate = (url, links) => {
   const schema = yup
     .string()
-    .trim()
-    .required(i18next.t('errors.emptyForm'))
-    .url(i18next.t('errors.invalidLink'))
-    .notOneOf(feedUrls, i18next.t('errors.existingFeed'));
+    .required()
+    .url()
+    .notOneOf(links);
   try {
     schema.validateSync(url);
     return null;
@@ -138,7 +136,9 @@ const runApp = () => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const url = formData.get('url');
-        const error = validate(url, watchedState.content.feeds);
+        const links = watchedState.content.feeds.map(({ link }) => link);
+
+        const error = validate(url, links);
         if (error) {
           watchedState.form.error = error;
           watchedState.form.state = 'failed';
