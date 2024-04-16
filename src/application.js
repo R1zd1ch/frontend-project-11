@@ -17,7 +17,12 @@ const validate = (url, links) => {
     .required()
     .url()
     .notOneOf(links);
-  return schema.validate(url);
+  try {
+    schema.validateSync(url);
+    return null;
+  } catch (e) {
+    return e.message;
+  }
 };
 
 const getAllOriginsURL = (url) => {
@@ -72,7 +77,10 @@ const runApp = () => {
           state: 'filling',
           error: null,
         },
-        loading: false,
+        loadingState: {
+          status: 'idle',
+          error: null,
+        },
         content: {
           feeds: [],
           posts: [],
@@ -105,37 +113,40 @@ const runApp = () => {
 
       const watchedState = onChange(initialState, render(elements, initialState, i18nT));
 
-      elements.form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const url = formData.get('url');
-        const links = watchedState.content.feeds.map(({ link }) => link);
+      const loadRss = (url) => {
+        watchedState.loadingState.status = 'loading';
 
-        if (watchedState.loading) {
-          return;
-        }
-
-        watchedState.loading = true;
-        validate(url, links)
-          .then((link) => {
-            const allOriginsURL = getAllOriginsURL(link);
-            return axios.get(allOriginsURL);
-          })
+        return axios.get(getAllOriginsURL(url), { timeout: refreshInterval })
           .then((response) => {
             const rssXML = response.data.contents;
             const { feed, posts } = parse(rssXML);
             watchedState.content.feeds.push({ ...feed, id: uniqueId(), link: url });
             addNewPosts(watchedState, posts);
+            watchedState.loadingState.status = 'idle';
             watchedState.form.state = 'finished';
           })
-          .catch((error) => {
-            const errorKey = error.message;
-            watchedState.form.error = errorKey;
-            watchedState.form.state = 'failed';
-          })
-          .finally(() => {
-            watchedState.loading = false;
+          .catch((e) => {
+            const errorKey = e.message;
+            watchedState.loadingState.error = errorKey;
+            watchedState.loadingState.status = 'failed';
+            throw e;
           });
+      };
+
+      elements.form.addEventListener('submit', (evt) => {
+        evt.preventDefault();
+        const formData = new FormData(evt.target);
+        const url = formData.get('url');
+        const links = watchedState.content.feeds.map(({ link }) => link);
+        const error = validate(url, links);
+        if (error) {
+          watchedState.form.error = error;
+          watchedState.form.state = 'failed';
+          return;
+        }
+        watchedState.form.state = 'sending';
+
+        loadRss(url);
       });
 
       elements.posts.addEventListener('click', (e) => {
